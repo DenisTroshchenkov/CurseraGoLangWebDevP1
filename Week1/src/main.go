@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -52,7 +53,7 @@ func dirTreeImpl(out *bytes.Buffer, dirName string, fullMod bool, indent string)
 func printTreeBranch(out *bytes.Buffer, file os.FileInfo, dirName string, fullMod bool, indent string, pref string, suff string) error {
 	if file.IsDir() {
 		out.WriteString(indent + pref + file.Name() + "\n")
-		err := dirTreeImpl(out, dirName+"/"+file.Name(), fullMod, indent+suff)
+		err := dirTreeImpl(out, filepath.Join(dirName, file.Name()), fullMod, indent+suff)
 		if err != nil {
 			return err
 		}
