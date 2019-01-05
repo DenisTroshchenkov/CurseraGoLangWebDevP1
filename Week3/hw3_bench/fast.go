@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"bufio"
 	"os"
-	"regexp"
+	"strings"
 	// "log"
 )
 
@@ -154,11 +154,9 @@ func (v *User) UnmarshalJSON(data []byte) error {
 func (v *User) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson22ea4ecfDecodeUserSt(l, v)
 }
-var (
-	r = regexp.MustCompile("@")
-	rAndroid = regexp.MustCompile("Android")
-	rMSIE = regexp.MustCompile("MSIE")
-)
+
+
+var user = &User{}
 
 // вам надо написать более быструю оптимальную этой функции
 func FastSearch(out io.Writer) {
@@ -172,16 +170,13 @@ func FastSearch(out io.Writer) {
 
 	seenBrowsers := make(map[string]bool)
 	uniqueBrowsers := 0
-	user := User{}
 	count := -1
 
 	fmt.Fprintln(out, "found users:")
 	for fileContents.Scan() {
 		count++
-		line := fileContents.Text()
 		// fmt.Printf("%v %v\n", err, line)
-		err := user.UnmarshalJSON([]byte(line))
-		if err != nil {
+		if err := user.UnmarshalJSON(fileContents.Bytes()); err != nil {
 			panic(err)
 		}
 		isMSIE := false
@@ -195,9 +190,9 @@ func FastSearch(out io.Writer) {
 		for _, browserRaw := range browsers {
 			browser := browserRaw
 			isFind := false
-			if isFind = rAndroid.MatchString(browser); isFind {
+			if isFind = strings.Contains(browser, "Android"); isFind {
 				isAndroid = true
-			} else if isFind = rMSIE.MatchString(browser); isFind {
+			} else if isFind = strings.Contains(browser, "MSIE"); isFind {
 				isMSIE = true
 			}
 			if isFind {
@@ -215,7 +210,7 @@ func FastSearch(out io.Writer) {
 		}
 
 		// log.Println("Android and MSIE user:", user["name"], user["email"])
-		email := r.ReplaceAllString(user.Email, " [at] ")
+		email := strings.Replace(user.Email, "@", " [at] ", -1)
 	        fmt.Fprintf(out, "[%d] %s <%s>\n", count, user.Name, email)
 	}
 
