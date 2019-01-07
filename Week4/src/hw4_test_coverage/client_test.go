@@ -239,7 +239,7 @@ func TestFindUsers(t *testing.T) {
 			Req: SearchRequest{
 				Query:      "Magna",
 				OrderField: "Id",
-				Limit:      3,
+				Limit:      26,
 			},
 			Result: &SearchResponse{
 				Users: []User{
